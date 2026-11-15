@@ -6,6 +6,12 @@ A [Honkai: Star Rail](https://hsr.hoyoverse.com/) theme for [Omarchy](https://om
 
 ![Chrysos Heirs](docs/preview.jpg)
 
+### 🎬 Demo
+
+[![Watch the demo](docs/demo-thumb.jpg)](https://github.com/Jitheswar/chrysos-heirs/raw/main/docs/demo.mp4)
+
+*All fourteen heirs on a real desktop and lock screen, plus the palette switching live. Click to watch (1:40, with sound).*
+
 ---
 
 ## What makes it special
@@ -99,6 +105,7 @@ Every colour and bond is in [`build.py`](build.py). Edit the heir you want, then
 ## Credits
 
 - **Wallpapers:** the art belongs to its original artists. Their signatures and watermarks are left intact in the images. This is a non-commercial fan project. **If you made one of these pieces and want it removed, please open an issue and it will be taken down right away.**
+- **Demo music:** "Amphoreus' Saga of Heroes" by HOYO-MiX, from *Honkai: Star Rail - Experience the Paths Vol.4*.
 - **Honkai: Star Rail** and its logo and characters are trademarks of **HoYoverse / COGNOSPHERE**. This project is not affiliated with or endorsed by them.
 - **[Omarchy](https://omarchy.org/)**: the theme system this plugs into.
 
