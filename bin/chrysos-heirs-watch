@@ -1,0 +1,14 @@
+#!/bin/bash
+# Chrysos Heirs: watch for wallpaper changes and re-sync the palette.
+# Run by the chrysos-heirs-sync.service systemd user unit.
+
+STATE="$HOME/.local/state/omarchy/current"
+SYNC="$(dirname "$(readlink -f "$0")")/chrysos-heirs-sync"
+
+mkdir -p "$STATE"
+"$SYNC"
+
+# The wallpaper is the `background` symlink, replaced on every change.
+inotifywait -m -q -e create,moved_to,attrib --format '%f' "$STATE" | while read -r file; do
+  [[ $file == background ]] && "$SYNC" &
+done

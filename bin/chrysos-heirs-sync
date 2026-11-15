@@ -1,0 +1,39 @@
+#!/bin/bash
+# Chrysos Heirs: make the theme's palette match the wallpaper on screen.
+#
+# Wallpapers are named NN-<heir>.<ext>; each heir's palette lives in
+# heirs/<heir>/. When the wallpaper and the applied palette disagree, copy that
+# heir's files into the theme and re-apply it without touching the wallpaper.
+# Does nothing unless Chrysos Heirs is the current theme, and nothing for a
+# wallpaper that is not one of the heirs (e.g. one you added yourself).
+
+set -uo pipefail
+
+THEME=chrysos-heirs
+STATE="$HOME/.local/state/omarchy/current"
+DIR="$HOME/.config/omarchy/themes/$THEME"
+LOCK="${XDG_RUNTIME_DIR:-/tmp}/chrysos-heirs-sync.lock"
+
+exec 8>"$LOCK"
+flock 8
+
+# Loop until stable, so a burst of wallpaper changes ends on the last one.
+for _ in 1 2 3 4 5; do
+  [[ $(cat "$STATE/theme.name" 2>/dev/null) == "$THEME" ]] || exit 0
+
+  bg=$(readlink -f "$STATE/background" 2>/dev/null) || exit 0
+  name=${bg##*/}
+  name=${name%.*}
+  heir=${name#[0-9][0-9]-}
+  [[ -n $heir && -d $DIR/heirs/$heir ]] || exit 0
+
+  applied=$(cat "$STATE/theme/active-heir" 2>/dev/null)
+  [[ $applied == "$heir" ]] && exit 0
+
+  for f in colors.toml chrysos-lock.json icons.theme; do
+    cp "$DIR/heirs/$heir/$f" "$DIR/$f"
+  done
+  printf '%s\n' "$heir" >"$DIR/active-heir"
+
+  OMARCHY_THEME_SKIP_BACKGROUND=1 omarchy-theme-set "$THEME" </dev/null >/dev/null 2>&1
+done
