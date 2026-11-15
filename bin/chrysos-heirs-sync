@@ -35,5 +35,9 @@ for _ in 1 2 3 4 5; do
   done
   printf '%s\n' "$heir" >"$DIR/active-heir"
 
-  OMARCHY_THEME_SKIP_BACKGROUND=1 omarchy-theme-set "$THEME" </dev/null >/dev/null 2>&1
+  if OMARCHY_THEME_SKIP_BACKGROUND=1 omarchy-theme-set "$THEME" </dev/null >/dev/null 2>&1; then
+    echo "wallpaper ${bg##*/} -> palette $heir" >&2
+  else
+    echo "wallpaper ${bg##*/} -> palette $heir FAILED (omarchy-theme-set exit $?)" >&2
+  fi
 done

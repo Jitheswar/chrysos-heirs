@@ -432,6 +432,35 @@ def write_lock_files(t, c, d):
     shutil.copy2(HERE / "assets" / "hsr-logo.png", d / "chrysos-lock-logo.png")
 
 
+def sniff(path):
+    """Real image format from the file's first bytes, whatever its extension says."""
+    head = Path(path).read_bytes()[:16]
+    if head.startswith(b"\x89PNG"):
+        return "png"
+    if head.startswith(b"\xff\xd8"):
+        return "jpg"
+    if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+        return "webp"
+    if head[4:12] in (b"ftypavif", b"ftypavis"):
+        return "avif"
+    return None
+
+
+def normalise_wallpaper(src):
+    """Omarchy and its wallpaper loaders trust the extension. A WebP or AVIF
+    saved as .png fails to load, so rewrite such files as real (lossless) PNGs."""
+    real = sniff(src)
+    ext = src.suffix.lower().lstrip(".").replace("jpeg", "jpg")
+    if real is None or real == ext:
+        return
+    tmp = src.with_name(f".{src.stem}.tmp.png")
+    subprocess.run(["magick", str(src), "-strip", f"PNG24:{tmp}"], check=True)
+    out = src.with_suffix(".png")
+    src.unlink()
+    tmp.rename(out)
+    print(f"  ~ {src.name} was really {real.upper()}; rewrote it as a true PNG")
+
+
 def link_or_copy(src, dst):
     if dst.exists():
         dst.unlink()
@@ -545,6 +574,7 @@ def build(out_root, previews=True, first="phainon"):
         (hd / "icons.theme").write_text(h["icons"] + "\n")
         (hd / "README.md").write_text(readme(h))
         src = WALLS / h["wall"]
+        normalise_wallpaper(src)
         link_or_copy(src, d / "backgrounds" / f"{i:02d}-{h['slug']}{src.suffix.lower()}")
         walls.append(src)
         print(f"  ✓ {h['name']}")
